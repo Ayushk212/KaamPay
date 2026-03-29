@@ -6,7 +6,7 @@ import PaymentSuccess from './screens/PaymentSuccess';
 import WorkerProfile from './screens/WorkerProfile';
 
 /**
- * MazdoorPay — Main App
+ * KaamPay — Main App
  * Routes between 5 demo screens in sequence.
  * State flows: VANI output → HISAAB output → PAISA output → display
  */

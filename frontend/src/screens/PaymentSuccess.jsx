@@ -101,7 +101,7 @@ export default function PaymentSuccess({ paisaOutput, hisaabOutput, onViewProfil
       <div className="header" style={{ margin: '-32px -20px 0', borderRadius: 0 }}>
         <div className="header-logo">M</div>
         <div className="header-text">
-          <h1>MazdoorPay</h1>
+          <h1>KaamPay</h1>
           <p>Payment Status | भुगतान स्थिति</p>
         </div>
       </div>
@@ -203,7 +203,7 @@ export default function PaymentSuccess({ paisaOutput, hisaabOutput, onViewProfil
             {/* View Profile Buttons */}
             <div className="bilingual mt-6 mb-3">
               <p className="en text-sm">View Worker Profiles</p>
-              <p className="hi">Mazdoor Profile dekhein</p>
+              <p className="hi">KaamPay Profile dekhein</p>
             </div>
 
             <div className="flex flex-col gap-2">
@@ -228,7 +228,7 @@ export default function PaymentSuccess({ paisaOutput, hisaabOutput, onViewProfil
                     <div className="flex-1">
                       <p className="font-semibold text-sm">{entry.worker_name}</p>
                       <p className="text-xs text-gray">
-                        MazdoorScore: {score?.score || 0} • {score?.band || 'building'}
+                        KaamScore: {score?.score || 0} • {score?.band || 'building'}
                       </p>
                     </div>
                     <span style={{ color: 'var(--gray-400)', fontSize: '1.25rem' }}>→</span>

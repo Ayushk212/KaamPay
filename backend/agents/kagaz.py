@@ -66,11 +66,11 @@ def generate_payslip_pdf(entry: dict, payment: dict, score: dict, contractor: di
 
     c.setFillColor(HexColor("#ffffff"))
     c.setFont("Helvetica-Bold", 16)
-    c.drawString(12, h - 28, "MazdoorPay")
+    c.drawString(12, h - 28, "KaamPay")
     c.setFont("Helvetica", 7)
     c.drawString(12, h - 40, "Powered by Paytm UPI")
     c.setFont("Helvetica", 7)
-    c.drawString(12, h - 50, "Digital Wage Payslip | Dijital Mazdoori Parchi")
+    c.drawString(12, h - 50, "Digital Wage Payslip | Dijital Salary Parchi")
 
     # ── Worker Name Section ──
     y = h - 78
@@ -163,11 +163,11 @@ def generate_payslip_pdf(entry: dict, payment: dict, score: dict, contractor: di
     c.setFillColor(MID_GRAY)
     c.drawString(12, y, f"{contractor.get('business', 'N/A')} — {contractor.get('location', 'N/A')}")
 
-    # ── MazdoorScore Bar ──
+    # ── KaamScore Bar ──
     y -= 22
     c.setFillColor(DARK_TEXT)
     c.setFont("Helvetica-Bold", 8)
-    c.drawString(12, y, f"MazdoorScore: {score.get('score', 0)}/850")
+    c.drawString(12, y, f"KaamScore: {score.get('score', 0)}/850")
 
     y -= 12
     bar_width = w - 24
@@ -192,7 +192,7 @@ def generate_payslip_pdf(entry: dict, payment: dict, score: dict, contractor: di
         "date": CONSTANTS["demo_date"],
         "net_pay": entry["net_pay"],
         "txn": payment.get("transaction_id", "N/A"),
-        "issuer": "MazdoorPay",
+        "issuer": "KaamPay",
         "score": score.get("score", 0)
     }
     qr_buffer = generate_qr_code(qr_data)
@@ -204,7 +204,7 @@ def generate_payslip_pdf(entry: dict, payment: dict, score: dict, contractor: di
     c.setFillColor(MID_GRAY)
     c.drawString(12, 30, "Scan QR for digital record")
     c.drawString(12, 22, "QR scan karein dijital record ke liye")
-    c.drawString(12, 12, "Issued by MazdoorPay | Powered by Paytm UPI")
+    c.drawString(12, 12, "Issued by KaamPay | Powered by Paytm UPI")
 
     c.save()
     return filepath
@@ -212,8 +212,8 @@ def generate_payslip_pdf(entry: dict, payment: dict, score: dict, contractor: di
 
 def generate_whatsapp_message(entry: dict, payment: dict, contractor: dict) -> str:
     """Generate WhatsApp payslip message (bilingual)."""
-    return f"""*MazdoorPay Payslip*
-*MazdoorPay Mazdoori Parchi*
+    return f"""*KaamPay Payslip*
+*KaamPay Salary Parchi*
 
 Naam: {entry['worker_name']}
 Tarikh: {CONSTANTS['demo_date']}
@@ -224,12 +224,12 @@ Rate: ₹{int(entry['rate_per_day'])}/din
 UPI Ref: {payment.get('upi_reference', 'N/A')}
 Employer: {contractor.get('business', 'N/A')}
 
-_MazdoorPay — Paytm se bheja_"""
+_KaamPay — Paytm se bheja_"""
 
 
 def generate_sms_message(entry: dict, payment: dict) -> str:
     """Generate SMS payslip (< 160 chars)."""
-    return f"MazdoorPay: {entry['worker_name']} ko ₹{int(entry['net_pay'])} bheje. {entry['days_worked']} din, ₹{int(entry['rate_per_day'])}/din. UPI:{payment.get('upi_reference', 'N/A')[:12]}"
+    return f"KaamPay: {entry['worker_name']} ko ₹{int(entry['net_pay'])} bheje. {entry['days_worked']} din, ₹{int(entry['rate_per_day'])}/din. UPI:{payment.get('upi_reference', 'N/A')[:12]}"
 
 
 def generate_all_payslips(hisaab_output: dict, payment_results: list, scores: dict) -> dict:
@@ -280,7 +280,7 @@ def generate_all_payslips(hisaab_output: dict, payment_results: list, scores: di
                 "date": CONSTANTS["demo_date"],
                 "net_pay": entry["net_pay"],
                 "txn": payment.get("transaction_id", "N/A"),
-                "issuer": "MazdoorPay",
+                "issuer": "KaamPay",
                 "score": score.get("score", 0)
             }
 

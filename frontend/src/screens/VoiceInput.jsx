@@ -94,7 +94,7 @@ export default function VoiceInput({ onTranscribed }) {
         <div className="header" style={{ margin: '-20px -20px 0', borderRadius: 0 }}>
           <div className="header-logo">M</div>
           <div className="header-text">
-            <h1>MazdoorPay</h1>
+            <h1>KaamPay</h1>
             <p>डिजिटल मज़दूरी | Powered by Paytm UPI</p>
           </div>
         </div>

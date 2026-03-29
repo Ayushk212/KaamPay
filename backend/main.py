@@ -1,5 +1,5 @@
 """
-MazdoorPay — FastAPI Server
+KaamPay — FastAPI Server
 Single API layer connecting all agents.
 RANG (frontend) calls these 4 endpoints.
 """
@@ -14,12 +14,12 @@ from typing import Optional
 
 from agents.vani import transcribe_and_extract
 from agents.hisaab import process_payroll
-from agents.paisa import execute_all_payments, calculate_mazdoor_score, get_worker_history, init_db
+from agents.paisa import execute_all_payments, calculate_kaam_score, get_worker_history, init_db
 from agents.kagaz import generate_all_payslips
 
 # Initialize
 app = FastAPI(
-    title="MazdoorPay API",
+    title="KaamPay API",
     description="Voice-first AI payroll for India's daily wage workers",
     version="1.0.0"
 )
@@ -131,7 +131,7 @@ async def api_process_payroll(req: PayrollRequest):
 async def api_execute_payments(req: PaymentRequest):
     """
     Takes HISAAB's output, executes mock payments,
-    generates payslips, computes MazdoorScores.
+    generates payslips, computes KaamScores.
     Returns combined PAISA + KAGAZ output.
     """
     try:
@@ -172,10 +172,10 @@ async def api_execute_payments(req: PaymentRequest):
 @app.get("/api/worker-score/{worker_id}")
 async def api_worker_score(worker_id: str):
     """
-    Returns MazdoorScore + payment history for a worker.
+    Returns KaamScore + payment history for a worker.
     """
     try:
-        score = calculate_mazdoor_score(worker_id)
+        score = calculate_kaam_score(worker_id)
         history = get_worker_history(worker_id, limit=8)
 
         return JSONResponse(content={
@@ -212,7 +212,7 @@ async def download_payslip(filename: str):
 
 @app.get("/api/health")
 async def health():
-    return {"status": "ok", "service": "MazdoorPay API", "version": "1.0.0"}
+    return {"status": "ok", "service": "KaamPay API", "version": "1.0.0"}
 
 
 # ─────────────────────────────────────────

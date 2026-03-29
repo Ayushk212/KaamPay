@@ -4,7 +4,7 @@ import { apiExecutePayments } from '../api';
 /**
  * Screen 3: Payroll Review
  * Contractor confirms workers and amounts before payment.
- * Shows wage compliance warnings, delivery methods, MazdoorScore preview.
+ * Shows wage compliance warnings, delivery methods, KaamScore preview.
  */
 
 const DELIVERY_LABELS = {
@@ -34,7 +34,7 @@ export default function PayrollReview({ hisaabOutput, onConfirm }) {
       <div className="header" style={{ margin: '-32px -20px 0', borderRadius: 0 }}>
         <div className="header-logo">M</div>
         <div className="header-text">
-          <h1>MazdoorPay</h1>
+          <h1>KaamPay</h1>
           <p>Payroll Review | पेरोल समीक्षा</p>
         </div>
       </div>
@@ -108,11 +108,11 @@ export default function PayrollReview({ hisaabOutput, onConfirm }) {
                       </div>
                     </div>
 
-                    {/* MazdoorScore mini bar */}
+                    {/* KaamScore mini bar */}
                     <div className="mt-2">
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-gray">
-                          MazdoorScore • {entry.days_in_system} din
+                          KaamScore • {entry.days_in_system} din
                         </span>
                       </div>
                       <div className="score-bar-track mt-1" style={{ height: '4px' }}>

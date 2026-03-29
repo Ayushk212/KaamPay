@@ -72,7 +72,7 @@ export default function Processing({ vaniOutput, onProcessed }) {
       <div className="header" style={{ margin: '-32px -20px 0', borderRadius: 0 }}>
         <div className="header-logo">M</div>
         <div className="header-text">
-          <h1>MazdoorPay</h1>
+          <h1>KaamPay</h1>
           <p>AI Payroll Processing</p>
         </div>
       </div>

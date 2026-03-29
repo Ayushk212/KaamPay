@@ -1,6 +1,6 @@
 """
 PAISA — Payments & Score Agent
-Simulates Paytm UPI payments and computes MazdoorScore credit identity.
+Simulates Paytm UPI payments and computes KaamScore credit identity.
 Takes input from HISAAB, passes output to RANG.
 """
 
@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 
 # Database path
 DB_DIR = os.path.join(os.path.dirname(__file__), '..', 'db')
-DB_PATH = os.path.join(DB_DIR, 'mazdoorpay.db')
+DB_PATH = os.path.join(DB_DIR, 'kaampay.db')
 
 # Load constants
 CONSTANTS_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'constants.json')
@@ -118,7 +118,7 @@ def execute_mock_payment(entry: dict) -> dict:
 
 
 def save_payroll_record(entry: dict, txn_id: str):
-    """Save payroll record to SQLite for MazdoorScore calculation."""
+    """Save payroll record to SQLite for KaamScore calculation."""
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
@@ -158,9 +158,9 @@ def calculate_progress(score: int, band: str) -> dict:
     }
 
 
-def calculate_mazdoor_score(worker_id: str) -> dict:
+def calculate_kaam_score(worker_id: str) -> dict:
     """
-    Calculate MazdoorScore for a worker based on their payroll history.
+    Calculate KaamScore for a worker based on their payroll history.
     Score range: 0-850, 5 bands.
     """
     conn = get_db()
@@ -347,7 +347,7 @@ def execute_all_payments(hisaab_output: dict) -> dict:
             save_payroll_record(entry, payment["transaction_id"])
 
             # Calculate score
-            score = calculate_mazdoor_score(entry["worker_id"])
+            score = calculate_kaam_score(entry["worker_id"])
             scores[entry["worker_id"]] = score
 
         total_paid = sum(p["amount"] for p in payment_results)

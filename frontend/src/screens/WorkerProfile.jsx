@@ -3,7 +3,7 @@ import { apiWorkerScore } from '../api';
 import { DEMO_PAISA_OUTPUT, DEMO_WORKER_HISTORY } from '../demo_data';
 
 /**
- * Screen 5: Worker Profile / MazdoorScore
+ * Screen 5: Worker Profile / KaamScore
  * THE SECOND EMOTIONAL PEAK — the credit identity.
  * Shows score, eligibility, payslip history, download.
  */
@@ -84,17 +84,17 @@ export default function WorkerProfile({ worker, paisaOutput, onBack, onHome }) {
           color: 'var(--green-600)',
           marginTop: '4px'
         }}>
-          {scoreData.days_in_system} din se MazdoorPay par
+          {scoreData.days_in_system} din se KaamPay par
         </p>
         <p className="text-xs text-gray">
-          {scoreData.days_in_system} days on MazdoorPay
+          {scoreData.days_in_system} days on KaamPay
         </p>
       </div>
 
-      {/* MazdoorScore Section */}
+      {/* KaamScore Section */}
       <div className="card mt-4 p-4">
         <div className="bilingual mb-3">
-          <p className="en text-sm">MazdoorScore</p>
+          <p className="en text-sm">KaamScore</p>
           <p className="hi">मज़दूर स्कोर</p>
         </div>
 

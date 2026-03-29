@@ -209,21 +209,21 @@ export const DEMO_PAISA_OUTPUT = {
   payment_status: "all_success",
   payslips: {
     W001: {
-      whatsapp_text: "*MazdoorPay Payslip*\n\nNaam: Ramesh Kumar\nTarikh: 2026-03-29\nKaam ke din: 1.0\nRate: ₹700/din\n*Net Pay: ₹700*\n\nUPI Ref: PAYTM837462819\nEmployer: Sharma Construction\n\n_MazdoorPay — Paytm se bheja_",
-      sms_text: "MazdoorPay: Ramesh Kumar ko ₹700 bheje. 1.0 din, ₹700/din. UPI:PAYTM837462",
-      qr_data: { worker: "Ramesh Kumar", worker_id: "W001", date: "2026-03-29", net_pay: 700, txn: "PAYABC123DEF456", issuer: "MazdoorPay", score: 487 },
+      whatsapp_text: "*KaamPay Payslip*\n\nNaam: Ramesh Kumar\nTarikh: 2026-03-29\nKaam ke din: 1.0\nRate: ₹700/din\n*Net Pay: ₹700*\n\nUPI Ref: PAYTM837462819\nEmployer: Sharma Construction\n\n_KaamPay — Paytm se bheja_",
+      sms_text: "KaamPay: Ramesh Kumar ko ₹700 bheje. 1.0 din, ₹700/din. UPI:PAYTM837462",
+      qr_data: { worker: "Ramesh Kumar", worker_id: "W001", date: "2026-03-29", net_pay: 700, txn: "PAYABC123DEF456", issuer: "KaamPay", score: 487 },
       delivery_method: "sms_payslip"
     },
     W002: {
-      whatsapp_text: "*MazdoorPay Payslip*\n\nNaam: Suresh Yadav\nTarikh: 2026-03-29\nKaam ke din: 1.0\nRate: ₹700/din\n*Net Pay: ₹700*\n\nUPI Ref: PAYTM291847365\nEmployer: Sharma Construction\n\n_MazdoorPay — Paytm se bheja_",
-      sms_text: "MazdoorPay: Suresh Yadav ko ₹700 bheje. 1.0 din, ₹700/din. UPI:PAYTM291847",
-      qr_data: { worker: "Suresh Yadav", worker_id: "W002", date: "2026-03-29", net_pay: 700, txn: "PAYGHI789JKL012", issuer: "MazdoorPay", score: 382 },
+      whatsapp_text: "*KaamPay Payslip*\n\nNaam: Suresh Yadav\nTarikh: 2026-03-29\nKaam ke din: 1.0\nRate: ₹700/din\n*Net Pay: ₹700*\n\nUPI Ref: PAYTM291847365\nEmployer: Sharma Construction\n\n_KaamPay — Paytm se bheja_",
+      sms_text: "KaamPay: Suresh Yadav ko ₹700 bheje. 1.0 din, ₹700/din. UPI:PAYTM291847",
+      qr_data: { worker: "Suresh Yadav", worker_id: "W002", date: "2026-03-29", net_pay: 700, txn: "PAYGHI789JKL012", issuer: "KaamPay", score: 382 },
       delivery_method: "qr_paper_receipt"
     },
     W003: {
-      whatsapp_text: "*MazdoorPay Payslip*\n\nNaam: Mohan Lal\nTarikh: 2026-03-29\nKaam ke din: 0.5\nRate: ₹700/din\n*Net Pay: ₹350*\n\nUPI Ref: PAYTM462819374\nEmployer: Sharma Construction\n\n_MazdoorPay — Paytm se bheja_",
-      sms_text: "MazdoorPay: Mohan Lal ko ₹350 bheje. 0.5 din, ₹700/din. UPI:PAYTM462819",
-      qr_data: { worker: "Mohan Lal", worker_id: "W003", date: "2026-03-29", net_pay: 350, txn: "PAYMNO345PQR678", issuer: "MazdoorPay", score: 621 },
+      whatsapp_text: "*KaamPay Payslip*\n\nNaam: Mohan Lal\nTarikh: 2026-03-29\nKaam ke din: 0.5\nRate: ₹700/din\n*Net Pay: ₹350*\n\nUPI Ref: PAYTM462819374\nEmployer: Sharma Construction\n\n_KaamPay — Paytm se bheja_",
+      sms_text: "KaamPay: Mohan Lal ko ₹350 bheje. 0.5 din, ₹700/din. UPI:PAYTM462819",
+      qr_data: { worker: "Mohan Lal", worker_id: "W003", date: "2026-03-29", net_pay: 350, txn: "PAYMNO345PQR678", issuer: "KaamPay", score: 621 },
       delivery_method: "whatsapp_payslip"
     }
   }
