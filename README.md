@@ -6,6 +6,15 @@ KaamPay eliminates exploitation in the unorganized sector by replacing manual, p
 
 ---
 
+## 📱 Mobile-First Native App Experience
+Built with vanilla CSS and smooth micro-animations, optimized for the 390px mobile viewport.
+
+| Point-of-Sale Voice | Real-time AI Pipeline | 1-Click UPI Payment | KaamScore Identity |
+| :---: | :---: | :---: | :---: |
+| <img src="assets/screen1.png" width="200"/> | <img src="assets/screen2.png" width="200"/> | <img src="assets/screen3.png" width="200"/> | <img src="assets/screen4.png" width="200"/> |
+
+---
+
 ## 🎯 The 5-Minute Pitch
 
 1. **Speak to Pay:** Contractors simply say *"Ramesh worked 1 day for ₹700"* into their phone.
