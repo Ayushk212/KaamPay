@@ -4,8 +4,8 @@ import { CONSTANTS } from '../demo_data';
 
 /**
  * Screen 1: Voice Input
- * Contractor speaks or plays demo audio.
- * Features: pulsing mic, waveform visualization, typewriter transcript
+ * Contractor speaks, types, or plays demo audio.
+ * Features: pulsing mic, waveform visualization, typewriter transcript, manual input
  */
 export default function VoiceInput({ onTranscribed }) {
   const [isRecording, setIsRecording] = useState(false);
@@ -13,11 +13,13 @@ export default function VoiceInput({ onTranscribed }) {
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [manualMode, setManualMode] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   const typingRef = useRef(null);
 
-  // Typewriter effect
+  // Typewriter effect — only runs for demo/mic input, not manual mode
   useEffect(() => {
-    if (!transcript) return;
+    if (!transcript || manualMode) return;
     setIsTyping(true);
     setDisplayedText('');
     let i = 0;
@@ -37,13 +39,14 @@ export default function VoiceInput({ onTranscribed }) {
   }, [transcript]);
 
   const handlePlayDemo = () => {
+    setManualMode(false);
+    setErrorMsg('');
     setTranscript(CONSTANTS.demo_audio_transcript);
   };
 
   const handleMicClick = () => {
     if (isRecording) {
       setIsRecording(false);
-      // Use Web Speech API result or demo transcript
       if (!transcript) {
         setTranscript(CONSTANTS.demo_audio_transcript);
       }
@@ -61,6 +64,7 @@ export default function VoiceInput({ onTranscribed }) {
       recognition.onresult = (event) => {
         const result = event.results[0][0].transcript;
         setIsRecording(false);
+        setManualMode(false);
         setTranscript(result);
       };
 
@@ -76,15 +80,31 @@ export default function VoiceInput({ onTranscribed }) {
       setIsRecording(true);
       recognition.start();
     } else {
-      // Fallback — use demo transcript
       setTranscript(CONSTANTS.demo_audio_transcript);
     }
   };
 
   const handleSubmit = async (text) => {
+    if (!text || !text.trim()) return;
     setIsProcessing(true);
-    const result = await apiTranscribe(text);
-    onTranscribed(result);
+    setErrorMsg('');
+    try {
+      const result = await apiTranscribe(text);
+      if (result.status === 'error') {
+        setErrorMsg(result.error_message || 'API returned an error');
+        setIsProcessing(false);
+        return;
+      }
+      onTranscribed(result);
+    } catch (e) {
+      setErrorMsg(e.message || 'Network error');
+      setIsProcessing(false);
+    }
+  };
+
+  const handleManualSubmit = () => {
+    if (!displayedText.trim()) return;
+    handleSubmit(displayedText);
   };
 
   return (
@@ -92,7 +112,7 @@ export default function VoiceInput({ onTranscribed }) {
       {/* Header */}
       <div>
         <div className="header" style={{ margin: '-20px -20px 0', borderRadius: 0 }}>
-          <div className="header-logo">M</div>
+          <div className="header-logo">K</div>
           <div className="header-text">
             <h1>KaamPay</h1>
             <p>डिजिटल मज़दूरी | Powered by Paytm UPI</p>
@@ -110,9 +130,9 @@ export default function VoiceInput({ onTranscribed }) {
         </div>
       </div>
 
-      {/* Center — Mic Area */}
+      {/* Center — Mic Area or Transcript */}
       <div className="flex flex-col items-center gap-6" style={{ flex: 1, justifyContent: 'center' }}>
-        {!transcript ? (
+        {!transcript && !manualMode ? (
           <>
             {/* Instruction text */}
             <div className="bilingual text-center">
@@ -159,9 +179,85 @@ export default function VoiceInput({ onTranscribed }) {
             <p className="text-xs text-gray text-center" style={{ marginTop: '4px' }}>
               Tap to record • टैप करें रिकॉर्ड करने के लिए
             </p>
+
+            {/* Or Type Manually Button */}
+            <button
+              className="btn btn-outline"
+              onClick={() => { setManualMode(true); setDisplayedText(''); }}
+              style={{ fontSize: '0.85rem', padding: '8px 20px' }}
+            >
+              ✏️ Type manually instead
+            </button>
           </>
+        ) : manualMode && !transcript ? (
+          /* Manual Input Mode */
+          <div style={{ width: '100%' }}>
+            <div className="bilingual mb-3">
+              <p className="en text-sm">Type your payroll command</p>
+              <p className="hi">अपनी मज़दूरी जानकारी टाइप करें</p>
+            </div>
+            
+            <textarea
+              className="p-3 rounded w-full text-sm"
+              style={{
+                fontFamily: 'var(--font-hi)',
+                background: 'white',
+                minHeight: '100px',
+                resize: 'vertical',
+                border: '2px solid var(--green-200)',
+                borderRadius: '12px',
+                fontSize: '1rem',
+                lineHeight: '1.5'
+              }}
+              value={displayedText}
+              onChange={(e) => setDisplayedText(e.target.value)}
+              placeholder="e.g. Shivank worked 1 day for 700 rupees"
+              autoFocus
+            />
+
+            {/* Error display */}
+            {errorMsg && (
+              <div style={{
+                background: '#FEF2F2', border: '1px solid #FECACA',
+                borderRadius: '8px', padding: '10px 14px', marginTop: '10px'
+              }}>
+                <p style={{ color: '#DC2626', fontSize: '0.8rem', margin: 0 }}>
+                  ⚠️ {errorMsg}
+                </p>
+              </div>
+            )}
+
+            <div className="flex gap-2 mt-3">
+              <button
+                className="btn btn-outline"
+                onClick={() => { setManualMode(false); setDisplayedText(''); setErrorMsg(''); }}
+                style={{ flex: 1 }}
+              >
+                ← Back
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={handleManualSubmit}
+                disabled={isProcessing || !displayedText.trim()}
+                style={{ flex: 2 }}
+              >
+                {isProcessing ? 'Processing...' : 'Process ➤'}
+              </button>
+            </div>
+            
+            {isProcessing && (
+              <div className="flex items-center gap-2 mt-4" style={{ justifyContent: 'center' }}>
+                <div style={{
+                  width: 20, height: 20, border: '2px solid var(--green-400)',
+                  borderTopColor: 'transparent', borderRadius: '50%',
+                  animation: 'spinStep 0.6s linear infinite'
+                }} />
+                <span className="text-sm text-green">Sending to Gemini AI...</span>
+              </div>
+            )}
+          </div>
         ) : (
-          /* Transcript Display */
+          /* Transcript Display (from mic/demo) */
           <div style={{ width: '100%' }}>
             <div className="bilingual mb-3">
               <p className="en text-sm">Transcript</p>
@@ -171,6 +267,19 @@ export default function VoiceInput({ onTranscribed }) {
               <span style={{ fontFamily: 'var(--font-hi)' }}>{displayedText}</span>
               {isTyping && <span className="typewriter-cursor" />}
             </div>
+
+            {/* Error display */}
+            {errorMsg && (
+              <div style={{
+                background: '#FEF2F2', border: '1px solid #FECACA',
+                borderRadius: '8px', padding: '10px 14px', marginTop: '10px'
+              }}>
+                <p style={{ color: '#DC2626', fontSize: '0.8rem', margin: 0 }}>
+                  ⚠️ {errorMsg}
+                </p>
+              </div>
+            )}
+
             {isProcessing && (
               <div className="flex items-center gap-2 mt-4" style={{ justifyContent: 'center' }}>
                 <div style={{
@@ -178,7 +287,7 @@ export default function VoiceInput({ onTranscribed }) {
                   borderTopColor: 'transparent', borderRadius: '50%',
                   animation: 'spinStep 0.6s linear infinite'
                 }} />
-                <span className="text-sm text-green">Processing...</span>
+                <span className="text-sm text-green">Sending to Gemini AI...</span>
               </div>
             )}
           </div>
@@ -187,7 +296,7 @@ export default function VoiceInput({ onTranscribed }) {
 
       {/* Bottom — Play Demo Button */}
       <div style={{ paddingBottom: '20px' }}>
-        {!transcript && (
+        {!transcript && !manualMode && (
           <button
             className="btn btn-outline btn-full btn-lg"
             onClick={handlePlayDemo}

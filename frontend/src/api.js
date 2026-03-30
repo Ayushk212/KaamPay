@@ -7,7 +7,7 @@
 import { DEMO_VANI_OUTPUT, DEMO_HISAAB_OUTPUT, DEMO_PAISA_OUTPUT, DEMO_WORKER_HISTORY } from './demo_data';
 
 const API_BASE = '/api';
-const TIMEOUT = 5000;
+const TIMEOUT = 30000; // Increased to 30s for GenAI real-time response
 
 async function fetchWithTimeout(url, options = {}) {
   const controller = new AbortController();
@@ -35,8 +35,8 @@ export async function apiTranscribe(text = null) {
     });
     return result;
   } catch (e) {
-    console.warn('[API] Transcribe failed, using demo data:', e.message);
-    return DEMO_VANI_OUTPUT;
+    console.error('[API] Transcribe failed:', e.message);
+    return { status: "error", transcript: text || "", payroll_entries: [], error_message: e.message };
   }
 }
 
@@ -52,8 +52,8 @@ export async function apiProcessPayroll(vaniOutput) {
     });
     return result;
   } catch (e) {
-    console.warn('[API] Process payroll failed, using demo data:', e.message);
-    return DEMO_HISAAB_OUTPUT;
+    console.error('[API] Process payroll failed:', e.message);
+    return { status: "error", entries: [], error_message: e.message, contractor: {}, worker_count: 0, total_payout: 0 };
   }
 }
 
@@ -69,8 +69,8 @@ export async function apiExecutePayments(hisaabOutput) {
     });
     return result;
   } catch (e) {
-    console.warn('[API] Execute payments failed, using demo data:', e.message);
-    return DEMO_PAISA_OUTPUT;
+    console.error('[API] Payment failed:', e.message);
+    return { payment_status: "error", payment_results: [], scores: {}, error_message: e.message };
   }
 }
 

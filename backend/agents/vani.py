@@ -1,12 +1,13 @@
 """
 VANI — Voice & NLP Agent
 Takes Hindi voice/text input and extracts structured payroll data.
-Uses Gemini 2.0 Flash for NER extraction with hardcoded fallback.
+Uses Gemini 2.0 Flash for NER extraction with retry logic for rate limits.
 """
 
 import os
 import re
 import json
+import time
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -40,6 +41,9 @@ Rules:
 - Number words to digits: "saat sau" -> 700
 - If rate not mentioned for a worker, use the last mentioned rate
 - "aaj kaam kiya" with hours = that many hours = days_worked calculation
+- If only one worker is mentioned, return only that one worker
+- Use EXACTLY the name provided. Do NOT invent or change names.
+- days_worked and rate_per_day and gross_pay MUST be numbers, not strings.
 
 Text: {transcript}
 
@@ -60,96 +64,65 @@ Format exactly:
 }}"""
 
 
-def extract_with_gemini(transcript: str) -> dict:
-    """Use Gemini 2.0 Flash for NER extraction."""
-    try:
-        model = genai.GenerativeModel("gemini-2.0-flash")
-        response = model.generate_content(
-            EXTRACTION_PROMPT.format(transcript=transcript),
-            generation_config=genai.types.GenerationConfig(
-                temperature=0.1,
-                max_output_tokens=1024,
-            )
-        )
-        text = response.text.strip()
-        # Clean markdown fences if present
-        if text.startswith("```"):
-            text = re.sub(r'^```(?:json)?\s*', '', text)
-            text = re.sub(r'\s*```$', '', text)
-        return json.loads(text)
-    except Exception as e:
-        print(f"[VANI] Gemini extraction failed: {e}")
-        return None
+MODELS_TO_TRY = [
+    "gemini-2.5-flash-lite",
+    "gemini-2.0-flash-lite",
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+]
 
 
-def extract_with_fallback(transcript: str) -> dict:
-    """Hardcoded extraction for the demo transcript. Always works."""
-    transcript_lower = transcript.lower()
-
-    entries = []
-
-    # Pattern matching for common Hindi payroll phrases
-    # Check for "Ramesh"
-    if "ramesh" in transcript_lower:
-        rate = 700
-        days = 1.0
-        if "8 ghante" in transcript_lower:
-            days = 1.0
-        entries.append({
-            "worker_name": "Ramesh Kumar",
-            "days_worked": days,
-            "rate_per_day": rate,
-            "gross_pay": days * rate
-        })
-
-    # Check for "Suresh"
-    if "suresh" in transcript_lower and "kaam kiya" in transcript_lower:
-        rate = 700
-        days = 1.0
-        if "8 ghante" in transcript_lower:
-            days = 1.0
-        entries.append({
-            "worker_name": "Suresh Yadav",
-            "days_worked": days,
-            "rate_per_day": rate,
-            "gross_pay": days * rate
-        })
-
-    # Check for "Mohan"
-    if "mohan" in transcript_lower:
-        rate = 700  # Use last mentioned rate
-        days = 0.5  # "aadha din"
-        if "aadha din" in transcript_lower or "adha din" in transcript_lower:
-            days = 0.5
-        entries.append({
-            "worker_name": "Mohan Lal",
-            "days_worked": days,
-            "rate_per_day": rate,
-            "gross_pay": days * rate
-        })
-
-    if not entries:
-        # Ultimate fallback — use demo data directly
-        entries = [
-            {"worker_name": "Ramesh Kumar", "days_worked": 1.0, "rate_per_day": 700, "gross_pay": 700.0},
-            {"worker_name": "Suresh Yadav", "days_worked": 1.0, "rate_per_day": 700, "gross_pay": 700.0},
-            {"worker_name": "Mohan Lal", "days_worked": 0.5, "rate_per_day": 700, "gross_pay": 350.0},
-        ]
-
-    return {
-        "entries": entries,
-        "confidence": 0.92,
-        "language_detected": "hi",
-        "parsing_notes": "Fallback extraction used"
-    }
+def extract_with_gemini(transcript: str, max_retries: int = 2) -> dict:
+    """Use Gemini for NER extraction. Tries multiple models if rate-limited."""
+    last_error = None
+    
+    for model_name in MODELS_TO_TRY:
+        for attempt in range(max_retries):
+            try:
+                print(f"[VANI] Trying {model_name} (attempt {attempt + 1}/{max_retries})")
+                model = genai.GenerativeModel(model_name)
+                response = model.generate_content(
+                    EXTRACTION_PROMPT.format(transcript=transcript),
+                    generation_config=genai.types.GenerationConfig(
+                        temperature=0.1,
+                        max_output_tokens=1024,
+                    )
+                )
+                text = response.text.strip()
+                # Clean markdown fences if present
+                if text.startswith("```"):
+                    text = re.sub(r'^```(?:json)?\s*', '', text)
+                    text = re.sub(r'\s*```$', '', text)
+                
+                parsed = json.loads(text)
+                print(f"[VANI] SUCCESS with {model_name}: {json.dumps(parsed, indent=2)}")
+                return parsed
+            except Exception as e:
+                last_error = e
+                error_str = str(e)
+                print(f"[VANI] {model_name} attempt {attempt + 1} failed: {error_str[:150]}")
+                
+                if "429" in error_str or "quota" in error_str.lower():
+                    # Rate limited on this model, try next model immediately
+                    print(f"[VANI] Rate limited on {model_name}, trying next model...")
+                    break
+                elif attempt < max_retries - 1:
+                    time.sleep(2)
+                    continue
+                else:
+                    break
+    
+    raise Exception(f"All Gemini models failed. Last error: {str(last_error)[:200]}")
 
 
 def generate_readback(entries: list) -> str:
     """Generate Hindi confirmation readback."""
     lines = []
     for e in entries:
-        days_hindi = "1 din" if e["days_worked"] == 1.0 else f"{e['days_worked']} din"
-        lines.append(f"{e['worker_name']} — {days_hindi} — ₹{int(e['gross_pay'])}")
+        days_worked = float(e.get("days_worked", 1.0))
+        gross_pay = float(e.get("gross_pay", 0))
+        days_hindi = "1 din" if days_worked == 1.0 else f"{days_worked} din"
+        lines.append(f"{e['worker_name']} — {days_hindi} — ₹{int(gross_pay)}")
     readback = "Maine suna:\n" + "\n".join(lines) + "\nSahi hai?"
     return readback
 
@@ -158,38 +131,33 @@ def transcribe_and_extract(text: str = None, audio_base64: str = None) -> dict:
     """
     Main VANI function.
     Takes text or audio, returns structured payroll output.
-    
-    Output contract:
-    {
-        "status": "success" | "needs_confirmation" | "error",
-        "transcript": "raw text",
-        "payroll_entries": [...],
-        "confidence": float,
-        "readback_hindi": "...",
-        "error_message": null
-    }
     """
     try:
         # Step 1: Get transcript
         if text:
             transcript = text
         elif audio_base64:
-            # For hackathon demo, we use text input
-            # Audio processing would go here with faster-whisper
             transcript = CONSTANTS["demo_audio_transcript"]
         else:
             transcript = CONSTANTS["demo_audio_transcript"]
 
-        # Step 2: Extract payroll data
-        extraction = None
-        if GEMINI_AVAILABLE:
-            extraction = extract_with_gemini(transcript)
+        print(f"[VANI] Processing transcript: '{transcript}'")
+        print(f"[VANI] GEMINI_AVAILABLE: {GEMINI_AVAILABLE}")
 
-        if extraction is None:
-            extraction = extract_with_fallback(transcript)
+        # Step 2: Extract payroll data
+        if not GEMINI_AVAILABLE:
+            raise Exception("Gemini API key not configured. Set GEMINI_API_KEY in backend/.env")
+
+        extraction = extract_with_gemini(transcript)
 
         entries = extraction.get("entries", [])
-        confidence = extraction.get("confidence", 0.5)
+        confidence = float(extraction.get("confidence", 0.85))
+
+        # Ensure numeric types on all entries
+        for entry in entries:
+            entry["days_worked"] = float(entry.get("days_worked", 1.0))
+            entry["rate_per_day"] = float(entry.get("rate_per_day", 0))
+            entry["gross_pay"] = float(entry.get("gross_pay", 0))
 
         # Step 3: Determine status based on confidence
         if confidence < 0.75:
@@ -200,7 +168,7 @@ def transcribe_and_extract(text: str = None, audio_base64: str = None) -> dict:
         # Step 4: Generate readback
         readback = generate_readback(entries)
 
-        return {
+        result = {
             "status": status,
             "transcript": transcript,
             "payroll_entries": entries,
@@ -208,8 +176,11 @@ def transcribe_and_extract(text: str = None, audio_base64: str = None) -> dict:
             "readback_hindi": readback,
             "error_message": None
         }
+        print(f"[VANI] Returning {len(entries)} entries with confidence {confidence}")
+        return result
 
     except Exception as e:
+        print(f"[VANI] CRITICAL ERROR: {str(e)}")
         return {
             "status": "error",
             "transcript": text or "",

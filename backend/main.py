@@ -21,7 +21,7 @@ from agents.kagaz import generate_all_payslips
 app = FastAPI(
     title="KaamPay API",
     description="Voice-first AI payroll for India's daily wage workers",
-    version="1.0.0"
+    version="1.0.1"
 )
 
 # CORS — allow frontend dev server

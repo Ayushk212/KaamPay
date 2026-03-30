@@ -106,15 +106,28 @@ def process_payroll(vani_output: dict) -> dict:
         total_payout = 0.0
 
         for pe in vani_output.get("payroll_entries", []):
+            if not isinstance(pe, dict):
+                continue
+            # Safely extract from Gemini dict
+            worker_name = str(pe.get("worker_name", pe.get("name", "Unknown Worker")))
+            try:
+                days_worked = float(pe.get("days_worked", 1.0))
+            except (ValueError, TypeError):
+                days_worked = 1.0
+            try:
+                rate_per_day = float(pe.get("rate_per_day", 700))
+            except (ValueError, TypeError):
+                rate_per_day = 700.0
+            
             # Match worker
-            worker = match_worker(pe["worker_name"], known_workers)
+            worker = match_worker(worker_name, known_workers)
 
             # Validate wage
-            wage_check = validate_wage(pe["rate_per_day"], state)
+            wage_check = validate_wage(rate_per_day, state)
 
             # Calculate net pay (no deductions for demo)
-            gross_pay = pe["days_worked"] * pe["rate_per_day"]
-            deductions = 0
+            gross_pay = days_worked * rate_per_day
+            deductions = float(pe.get("deductions", 0))
             net_pay = gross_pay - deductions
 
             # Determine delivery method
@@ -124,8 +137,8 @@ def process_payroll(vani_output: dict) -> dict:
                 "worker_id": worker["id"],
                 "worker_name": worker["name"],
                 "aadhaar_last4": worker.get("aadhaar_last4", "0000"),
-                "days_worked": pe["days_worked"],
-                "rate_per_day": pe["rate_per_day"],
+                "days_worked": days_worked,
+                "rate_per_day": rate_per_day,
                 "gross_pay": gross_pay,
                 "deductions": deductions,
                 "net_pay": net_pay,
