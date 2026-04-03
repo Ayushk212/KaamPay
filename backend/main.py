@@ -43,6 +43,10 @@ app = FastAPI(
     version="2.0.0"
 )
 
+@app.get("/")
+def health_check():
+    return {"status": "healthy", "service": "KaamPay API"}
+
 # CORS — allow all origins (supports Vercel + local dev)
 app.add_middleware(
     CORSMiddleware,
